@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import './App.css';
 import Movie from './Movie'; // ./ -->현재 폴더
-import { thisExpression } from "@babel/types";
 
 
 
@@ -11,36 +10,43 @@ class App extends Component{
     
   }
 
-  //5초 뒤에 새로운 영화가 추가
+  /*
+  async, await
+
+  fetch로 받아온 데이터와 그걸 처리하는 then을 일일이 지정하지 않고
+  fetch가 실행된 이후 바로 다음 실행구문을 실행하게 해주는 tool
+
+  async:이전 라인의 작업이 끝날 때까지 기다리지 않고 실행될 작업
+  await:해당 기능이 끝나는 것을 기다린 후 실행 후(성공적이든 아니든)에 실행될 작업
+   */
+
+  _callApi = () => { 
+    return fetch('https://yts.am/api/v2/list_movies.json?sort_by=download_count')
+    .then(b => b.json())
+    .then(c => c.data.movies)
+    .catch(err => console.log(err))
+  }
+
+  _getMovies = async () => {
+    const movies = await this._callApi();
+    this.setState({
+      movies
+    })
+  }
+
   componentDidMount(){
-    setTimeout(()=>{
-      this.setState({
-        movies:[
-          {
-            title:'타이타닉',
-            poster:'http://image.cine21.com/resize/cine21/poster/2018/0102/17_50_39__5a4b47df43cd9[X230,330].jpg'
-          },
-          {
-            title:'캡틴마블',
-            poster:'http://image.cine21.com/resize/cine21/poster/2019/0225/14_10_18__5c7378ba87fb6[X230,330].jpg'
-          },
-          {
-            title:'신데렐라',
-            poster:'http://image.cine21.com/resize/cine21/poster/2015/0319/13_42_29__550a53b540b97[X230,330].jpg'
-          },
-          {
-            title:'베놈',
-            poster:'http://image.cine21.com/resize/cine21/poster/2018/0921/11_48_04__5ba45be496c69[X230,330].jpg'
-          }
-        ]
-      })
-    },2000);
+    this._getMovies();
   }
 
   //랜더링 function
   _renderMovies =()=>{
     const movies=this.state.movies.map((x,index)=>{
-      return <Movie title={x.title} poster={x.poster} key={index}/>
+      return <Movie 
+      title={x.title} 
+      poster={x.medium_cover_image} 
+      key={index} 
+      genres={x.genres}
+      synopsis={x.synopsis}/>
     });
     return movies;
   }
